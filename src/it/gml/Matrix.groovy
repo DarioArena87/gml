@@ -4,8 +4,6 @@ import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import it.gml.utils.Format
 
-import static java.util.Arrays.asList
-
 @CompileStatic
 class Matrix {
 
@@ -228,7 +226,7 @@ class Matrix {
     }
 
     Number getSparsity() {
-        asList(elems).flatten().findAll().size() / (rows * columns)
+        elems.flatten().findAll().size() / (rows * columns)
     }
 
     Number getDensity() {
