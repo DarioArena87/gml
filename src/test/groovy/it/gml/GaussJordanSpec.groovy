@@ -15,10 +15,19 @@ class GaussJordanSpec extends Specification {
             ]
         )
 
-        when:
-        Matrix echForm = GaussJordan.transformToEchelonForm(m).result.round(4)
+        expect:
+        use(GaussJordan) {
+            m.echelonForm.result.round(4) == new Matrix(
+                [
+                    [5,    8,       0,      5],
+                    [0, -6.8,       7,     -8],
+                    [0,    0, -1.6471, 4.8824],
+                    [0,    0,       0, 5.9286],
+                ]
+            )
+        }
 
-        then:
+        and:
         m == new Matrix(
             [
                 [0, 0, 2, 0],
@@ -27,19 +36,9 @@ class GaussJordanSpec extends Specification {
                 [8, 6, 7, 0],
             ]
         )
-
-        and:
-        echForm == new Matrix(
-            [
-                [5,    8,       0,      5],
-                [0, -6.8,       7,     -8],
-                [0,    0, -1.6471, 4.8824],
-                [0,    0,       0, 5.9286],
-            ]
-        )
     }
 
-    def "Reduced Echelon form"(){
+    def "Reduced Echelon form"() {
         given:
         Matrix m = new Matrix(
             [
@@ -50,10 +49,19 @@ class GaussJordanSpec extends Specification {
             ]
         )
 
-        when:
-        Matrix echForm = GaussJordan.transformToReducedEchelonForm(m).result.round(4)
+        expect:
+        use(GaussJordan) {
+            m.reducedEchelonForm.result.round(4) == new Matrix(
+                [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]
+                ]
+            )
+        }
 
-        then:
+        and:
         m == new Matrix(
             [
                 [0, 0, 2, 0],
@@ -63,14 +71,5 @@ class GaussJordanSpec extends Specification {
             ]
         )
 
-        and:
-        echForm == new Matrix(
-            [
-                [1, 0, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]
-            ]
-        )
     }
 }

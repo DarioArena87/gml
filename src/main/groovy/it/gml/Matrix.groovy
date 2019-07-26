@@ -204,7 +204,7 @@ class Matrix {
             return elems[0][0] * elems[1][1] - elems[0][1] * elems[1][0]
         }
 
-        final def efc = GaussJordan.transformToEchelonForm(this)
+        final def efc = GaussJordan.getEchelonForm(this)
         return (-1)**efc.numberOfRowsExchanges * (efc.result.trace.inject(1, { final Number a, final Number b -> a * b }) as Number)
     }
 
@@ -232,20 +232,23 @@ class Matrix {
         (1 - sparsity) as Number
     }
 
+    @CompileDynamic
     Matrix invert() {
         assert determinant != 0: "Singular matrix cannot be inverted"
 
-        final Matrix identity = MatrixGenerator.identity(rows)
+        use(GaussJordan) {
+            final Matrix identity = MatrixGenerator.identity(rows)
 
-        final Matrix reducedEchelonForm = GaussJordan.transformToReducedEchelonForm(this.augment(identity)).result
+            final Matrix result = augment(identity).reducedEchelonForm.result
 
-        final List<List<Number>> elemsResult = new ArrayList<>(rows)
+            final List<List<Number>> elemsResult = new ArrayList<>(rows)
 
-        for (int i = 0; i < rows; i++) {
-            elemsResult[i] = reducedEchelonForm[i][columns..<reducedEchelonForm.columns]
+            for (int i = 0; i < rows; i++) {
+                elemsResult[i] = result[i][columns..<result.columns]
+            }
+
+            new Matrix(elemsResult)
         }
-
-        new Matrix(elemsResult)
     }
 
     Matrix round(final int precision) {

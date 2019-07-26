@@ -6,7 +6,7 @@ class GaussJordan {
         int numberOfRowsExchanges = 0
     }
 
-    static EchelonFormComputation transformToEchelonForm(final Matrix m){
+    static EchelonFormComputation getEchelonForm(final Matrix m){
         final Matrix result = new Matrix(m.copyOfElems)
         int numberOfRowsExchanges = 0
         for (int pivotIndex = 0; pivotIndex < result.rows; pivotIndex++) {
@@ -32,8 +32,8 @@ class GaussJordan {
         return new EchelonFormComputation(result: result, numberOfRowsExchanges: numberOfRowsExchanges)
     }
 
-    static EchelonFormComputation transformToReducedEchelonForm(final Matrix m) {
-        final EchelonFormComputation ecf = transformToEchelonForm(m)
+    static EchelonFormComputation getReducedEchelonForm(final Matrix m) {
+        final EchelonFormComputation ecf = getEchelonForm(m)
         final Matrix echelonForm = ecf.result
         for (int pivotIndex = echelonForm.rows - 1; pivotIndex >= 0; pivotIndex--) {
             Number pivot = echelonForm[pivotIndex][pivotIndex]
