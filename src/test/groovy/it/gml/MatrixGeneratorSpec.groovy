@@ -2,7 +2,7 @@ package it.gml
 
 import spock.lang.Specification
 
-class MatrixGeneratorSpecification extends Specification {
+class MatrixGeneratorSpec extends Specification {
 	def "Diagonal matrix is a all zero matrix except for elements on diagonal"() {
 		given:
 		Matrix d = MatrixGenerator.diagonal(4, 7)

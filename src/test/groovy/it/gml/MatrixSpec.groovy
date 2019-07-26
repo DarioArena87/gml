@@ -2,7 +2,7 @@ package it.gml
 
 import spock.lang.Specification
 
-class MatrixSpecification extends Specification {
+class MatrixSpec extends Specification {
     def "A matrix is a grid of elements"() {
         given:
         Matrix a = new Matrix(
