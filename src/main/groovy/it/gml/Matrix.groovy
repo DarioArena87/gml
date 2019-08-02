@@ -3,6 +3,9 @@ package it.gml
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import it.gml.utils.Format
+import it.gml.utils.Product
+
+import static it.gml.MatrixGenerator.identity
 
 @CompileStatic
 class Matrix {
@@ -86,15 +89,7 @@ class Matrix {
     }
 
     Matrix plus(final Number scalar) {
-        final Matrix result = new Matrix(rows, columns)
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[i][j] = elems[i][j] + scalar
-            }
-        }
-
-        return result
+        new Matrix(elems.collectNested { Number elem -> elem + scalar })
     }
 
     Matrix minus(final Matrix b) {
@@ -111,14 +106,7 @@ class Matrix {
     }
 
     Matrix minus(final Number scalar) {
-        final Matrix result = new Matrix(rows, columns)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[i][j] = elems[i][j] - scalar
-            }
-        }
-
-        return result
+        new Matrix(elems.collectNested { Number elem -> elem - scalar })
     }
 
     Matrix multiply(final Matrix b) {
@@ -138,23 +126,14 @@ class Matrix {
     }
 
     Matrix multiply(final Number scalar) {
-
-        final Matrix result = new Matrix(rows, columns)
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[i][j] = elems[i][j] * scalar
-            }
-        }
-
-        return result
+        new Matrix(elems.collectNested { Number elem -> elem * scalar })
     }
 
     Matrix power(final long exponent) {
         assert rows == columns: "Matrix must be a square matrix"
 
         Matrix a = exponent > 0 ? this : this.invert()
-        final Matrix i = MatrixGenerator.identity(rows)
+        final Matrix i = identity(rows)
         Matrix result = i
 
         long power = exponent.abs()
@@ -184,13 +163,7 @@ class Matrix {
     }
 
     Matrix transpose() {
-        final Matrix result = new Matrix(columns, rows)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[j][i] = elems[i][j]
-            }
-        }
-        return result
+        new Matrix(elems.transpose())
     }
 
     Number getDeterminant() {
@@ -205,23 +178,20 @@ class Matrix {
         }
 
         final def efc = GaussJordan.getEchelonForm(this)
-        return (-1)**efc.numberOfRowsExchanges * (efc.result.trace.inject(1, { final Number a, final Number b -> a * b }) as Number)
+        return (-1)**efc.numberOfRowsExchanges * Product.of(efc.result.trace)
     }
 
     List<List<Number>> getCopyOfElems() {
-        final List<List<Number>> newElems = new ArrayList<List<Number>>(elems)
-        for (int i = 0; i < rows; i++) {
-            newElems[i] = new ArrayList<Number>(elems[i])
-        }
-
-        return newElems
+        elems.collect { it.collect() }
     }
 
     Matrix minor(final int row, final int column) {
-        final List<List<Number>> newElems = copyOfElems
-        newElems.remove(row)
-        newElems*.remove(column)
-        new Matrix(newElems)
+        new Matrix(
+            copyOfElems.tap {
+                it.remove(row)
+                it*.remove(column)
+            }
+        )
     }
 
     Number getSparsity() {
@@ -232,44 +202,22 @@ class Matrix {
         (1 - sparsity) as Number
     }
 
-    @CompileDynamic
     Matrix invert() {
         assert determinant != 0: "Singular matrix cannot be inverted"
 
-        use(GaussJordan) {
-            final Matrix identity = MatrixGenerator.identity(rows)
-
-            final Matrix result = augment(identity).reducedEchelonForm.result
-
-            final List<List<Number>> elemsResult = new ArrayList<>(rows)
-
-            for (int i = 0; i < rows; i++) {
-                elemsResult[i] = result[i][columns..<result.columns]
-            }
-
-            new Matrix(elemsResult)
-        }
+        final Matrix augmentedMatrix = augment(identity(rows))
+        final Matrix result = GaussJordan.getReducedEchelonForm(augmentedMatrix).result
+        new Matrix(result.elems.collect { it[columns..<result.columns] })
     }
 
     Matrix round(final int precision) {
-        final Matrix result = new Matrix(rows, columns)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[i][j] = elems[i][j].toBigDecimal().round(precision)
-            }
-        }
-        return result
+        new Matrix(elems.collectNested { Number elem -> elem.toBigDecimal().round(precision) })
     }
 
     Matrix augment(final Matrix m) {
         assert m.rows == rows: "Matrices' row number must be equal"
 
-        final List<List<Number>> newElems = new ArrayList<>(rows)
-        for (int i = 0; i < m.rows; i++) {
-            newElems[i] = [elems[i], m[i]].flatten() as List<Number>
-        }
-
-        new Matrix(newElems)
+        new Matrix(elems.indexed().collect { int rowNumber, List<Number> row -> row + m[rowNumber] })
     }
 
     List<Number> getTrace() {
