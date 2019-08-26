@@ -48,7 +48,7 @@ class Matrix {
     }
 
     String toString() {
-        final List<List<String>> elemsString = elems.collect { final row -> row.collect Format.toPlainString }
+        final List<List<String>> elemsString = elems.collectNested Format.toPlainString
         final int maxDigits = elemsString.flatten().collect { it.toString().size() }.max()
         final Closure<String> leftPadMaxDigits = Format.leftPad.rcurry(maxDigits)
 
