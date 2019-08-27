@@ -1,6 +1,6 @@
 package it.gml
 
-import groovy.transform.CompileDynamic
+
 import groovy.transform.CompileStatic
 import it.gml.utils.Format
 import it.gml.utils.Product
@@ -62,7 +62,7 @@ class Matrix {
 
     @Override
     boolean equals(final Object obj) {
-        if (obj == null || this.class != obj.class) {
+        if (obj == null || !obj in Matrix) {
             return false
         }
 
@@ -133,8 +133,7 @@ class Matrix {
         assert rows == columns: "Matrix must be a square matrix"
 
         Matrix a = exponent > 0 ? this : this.invert()
-        final Matrix i = identity(rows)
-        Matrix result = i
+        Matrix result = identity(rows)
 
         long power = exponent.abs()
         while (power) {

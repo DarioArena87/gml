@@ -14,21 +14,13 @@ class GeneralUsageTest extends Specification {
         )
 
         and: "A known vector"
-        Matrix b = new Matrix(
-            [
-                [6], [-3], [0]
-            ]
-        )
+        Matrix b = new Vector([6, -3, 0])
 
         when: "I compute the solution as A^(-1) * b"
         Matrix x = A**-1 * b
 
         then:
-        x.round(4) == new Matrix(
-            [
-                [1], [-2], [3]
-            ]
-        )
+        x.round(4) == new Vector([1, -2, 3])
     }
 
     def "If a matrix is singular, system has no solution"() {
@@ -42,11 +34,7 @@ class GeneralUsageTest extends Specification {
         )
 
         and: "A known vector"
-        Matrix b = new Matrix(
-            [
-                [0], [1], [2]
-            ]
-        )
+        Matrix b = new Vector([0, 1, 2])
 
         when: "I compute the solution as A^(-1) * b"
         Matrix x = A**-1 * b
