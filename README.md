@@ -23,7 +23,7 @@ CommonOps_DDRM.mult(CommonOps_DDRM.invert(A), b, c);
 Matrix A = new Matrix([
                 [1, 3], 
                 [2, 5]
-		    ])
+	   ])
 Vector b = new Vector([2, 1])
 
 Vector c = A.invert().multiply(b) // or better c = A**-1 * b
