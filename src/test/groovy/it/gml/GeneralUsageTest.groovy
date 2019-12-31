@@ -45,7 +45,7 @@ class GeneralUsageTest extends Specification {
 
     def "Big matrices inversion are not a problem"() {
         given: "A big matrix"
-        Matrix A = Spy(Matrix, constructorArgs: [MatrixGenerator.random(50, 50).elems])
+        Matrix A = Spy(Matrix, constructorArgs: [MatrixGenerator.random(50, 50).elements])
 
         when:
         Matrix b = A.invert()

@@ -10,54 +10,52 @@ import static it.gml.MatrixGenerator.identity
 @CompileStatic
 class Matrix {
 
-    private static final Integer ZERO = Integer.valueOf(0)
-
-    final List<List<Number>> elems
+    final List<List<Number>> elements
 
     Matrix(final int rows, final int cols) {
         assert rows > 0: "Rows must be positive"
         assert cols > 0: "Columns must be positive"
 
-        elems = new ArrayList<>(rows)
-        rows.times { final row -> elems[row] = new ArrayList<Number>(cols) }
+        elements = new ArrayList<>(rows)
+        rows.times { final row -> elements[row] = new ArrayList<Number>(cols) }
     }
 
-    Matrix(final List<List<Number>> elems) {
-        assert elems: "Matrix must not be empty"
-        assert elems.collect { it.size() }.unique().size() == 1: "Number of columns for each row must be equal"
+    Matrix(final List<List<Number>> elements) {
+        assert elements: "Matrix must not be empty"
+        assert elements.collect { it.size() }.unique().size() == 1: "Number of columns for each row must be equal"
 
-        this.elems = elems
+        this.elements = elements
     }
 
     int getRows() {
-        elems.size()
+        elements.size()
     }
 
     int getColumns() {
-        elems[0].size()
+        elements[0].size()
     }
 
     List<Number> getAt(final int row) {
-        elems[row]
+        elements[row]
     }
 
     void putAt(final int rowIndex, final List<Number> row) {
         assert row.size() == rows: "New row must be of the same size as other rows"
 
-        elems[rowIndex] = row
+        elements[rowIndex] = row
     }
 
     String toString() {
-        final List<List<String>> elemsString = elems.collectNested Format.toPlainString
-        final int maxDigits = elemsString.flatten().collect { it.toString().size() }.max()
+        final List<List<String>> elementsString = elements.collectNested Format.toPlainString
+        final int maxDigits = elementsString.flatten().collect { it.toString().size() }.max()
         final Closure<String> leftPadMaxDigits = Format.leftPad.rcurry(maxDigits)
 
-        elemsString.collect { "| ${it.collect(leftPadMaxDigits).join('  ')} |" }.join('\n')
+        elementsString.collect { "| ${it.collect(leftPadMaxDigits).join('  ')} |" }.join('\n')
     }
 
     @Override
     int hashCode() {
-        Objects.hash(elems)
+        Objects.hash(elements)
     }
 
     @Override
@@ -68,7 +66,7 @@ class Matrix {
 
         final Matrix b = obj as Matrix
 
-        return equalsDimensions(b) && elems == b.elems
+        return equalsDimensions(b) && elements == b.elements
     }
 
     boolean equalsDimensions(final Matrix b) {
@@ -81,7 +79,7 @@ class Matrix {
         final Matrix result = new Matrix(rows, columns)
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                result[i][j] = elems[i][j] + b[i][j]
+                result[i][j] = elements[i][j] + b[i][j]
             }
         }
 
@@ -89,7 +87,7 @@ class Matrix {
     }
 
     Matrix plus(final Number scalar) {
-        new Matrix(elems.collectNested { Number elem -> elem + scalar })
+        new Matrix(elements.collectNested { Number elem -> elem + scalar })
     }
 
     Matrix minus(final Matrix b) {
@@ -98,7 +96,7 @@ class Matrix {
         final Matrix result = new Matrix(rows, columns)
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                result[i][j] = elems[i][j] - b[i][j]
+                result[i][j] = elements[i][j] - b[i][j]
             }
         }
 
@@ -106,7 +104,7 @@ class Matrix {
     }
 
     Matrix minus(final Number scalar) {
-        new Matrix(elems.collectNested { Number elem -> elem - scalar })
+        new Matrix(elements.collectNested { Number elem -> elem - scalar })
     }
 
     Matrix multiply(final Matrix b) {
@@ -115,9 +113,9 @@ class Matrix {
         final Matrix result = new Matrix(rows, b.columns)
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < b.columns; j++) {
-                result[i][j] = ZERO
+                result[i][j] = 0 as Number
                 for (int k = 0; k < columns; k++) {
-                    result[i][j] += elems[i][k] * b[k][j]
+                    result[i][j] += elements[i][k] * b[k][j]
                 }
             }
         }
@@ -126,7 +124,7 @@ class Matrix {
     }
 
     Matrix multiply(final Number scalar) {
-        new Matrix(elems.collectNested { Number elem -> elem * scalar })
+        new Matrix(elements.collectNested { Number elem -> elem * scalar })
     }
 
     Matrix power(final long exponent) {
@@ -162,31 +160,31 @@ class Matrix {
     }
 
     Matrix transpose() {
-        new Matrix(elems.transpose())
+        new Matrix(elements.transpose())
     }
 
     Number getDeterminant() {
         assert rows == columns: "Cannot compute determinant on non square matrix"
 
         if (rows == 1) {
-            return elems[0][0]
+            return elements[0][0]
         }
 
         if (rows == 2) {
-            return elems[0][0] * elems[1][1] - elems[0][1] * elems[1][0]
+            return elements[0][0] * elements[1][1] - elements[0][1] * elements[1][0]
         }
 
-        final def efc = GaussJordan.getEchelonForm(this)
+        final GaussJordan.EchelonFormComputation efc = GaussJordan.getEchelonForm(this)
         return (-1)**efc.numberOfRowsExchanges * Product.of(efc.result.trace)
     }
 
-    List<List<Number>> getCopyOfElems() {
-        elems.collect { it.collect() }
+    List<List<Number>> getCopyOfElements() {
+        elements.collect { it.collect() }
     }
 
     Matrix minor(final int row, final int column) {
         new Matrix(
-            copyOfElems.tap {
+            copyOfElements.tap {
                 it.remove(row)
                 it*.remove(column)
             }
@@ -194,7 +192,7 @@ class Matrix {
     }
 
     Number getSparsity() {
-        elems.flatten().findAll().size() / (rows * columns)
+        elements.flatten().findAll().size() / (rows * columns)
     }
 
     Number getDensity() {
@@ -206,20 +204,20 @@ class Matrix {
 
         final Matrix augmentedMatrix = augment(identity(rows))
         final Matrix result = GaussJordan.getReducedEchelonForm(augmentedMatrix).result
-        new Matrix(result.elems.collect { it[columns..<result.columns] })
+        new Matrix(result.elements.collect { it[columns..<result.columns] })
     }
 
     Matrix round(final int precision) {
-        new Matrix(elems.collectNested { Number elem -> elem.toBigDecimal().round(precision) })
+        new Matrix(elements.collectNested { Number elem -> elem.toBigDecimal().round(precision) })
     }
 
     Matrix augment(final Matrix m) {
         assert m.rows == rows: "Matrices' row number must be equal"
 
-        new Matrix(elems.indexed().collect { int rowNumber, List<Number> row -> row + m[rowNumber] })
+        new Matrix(elements.indexed().collect { int rowNumber, List<Number> row -> row + m[rowNumber] })
     }
 
     List<Number> getTrace() {
-        (0..<rows).collect { elems[it][it] }
+        (0..<rows).collect { elements[it][it] }
     }
 }
