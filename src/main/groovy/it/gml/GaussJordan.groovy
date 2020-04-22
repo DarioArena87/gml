@@ -7,7 +7,7 @@ class GaussJordan {
     }
 
     static EchelonFormComputation getEchelonForm(final Matrix m){
-        final Matrix result = new Matrix(m.copyOfElems)
+        final Matrix result = new Matrix(m.copyOfElements)
         int numberOfRowsExchanges = 0
         for (int pivotIndex = 0; pivotIndex < result.rows; pivotIndex++) {
             if (!result[pivotIndex][pivotIndex]) {
@@ -57,7 +57,7 @@ class GaussJordan {
     private static int findPivotRowIndex(final Matrix m, final int startPivotIndex) {
         final int column = startPivotIndex
         for (int i = startPivotIndex; i < m.rows; i++) {
-            if (m.elems[i][column] != 0) {
+            if (m.elements[i][column] != 0) {
                 return i
             }
         }
@@ -65,8 +65,8 @@ class GaussJordan {
     }
 
     private static void exchangeRows(final Matrix m, final int rowIndexA, final int rowIndexB) {
-        final List<Number> rowB = m.elems[rowIndexB]
-        m.elems[rowIndexB] = m.elems[rowIndexA]
-        m.elems[rowIndexA] = rowB
+        final List<Number> rowB = m.elements[rowIndexB]
+        m.elements[rowIndexB] = m.elements[rowIndexA]
+        m.elements[rowIndexA] = rowB
     }
 }
