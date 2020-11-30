@@ -1,5 +1,8 @@
 package it.gml
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 class GaussJordan {
     static class EchelonFormComputation {
         Matrix result
