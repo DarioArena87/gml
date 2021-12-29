@@ -20,7 +20,7 @@ class GeneralUsageTest extends Specification {
         Matrix x = A**-1 * b
 
         then:
-        x.round(4) == new Vector([1, -2, 3]).transpose()
+        x.round(4) == new Vector(1, -2, 3).transpose()
     }
 
     def "If a matrix is singular, system has no solution"() {
@@ -52,5 +52,6 @@ class GeneralUsageTest extends Specification {
 
         then:
         1 * A.determinant
+        (b * A).round(4) == MatrixGenerator.identity(50)
     }
 }
