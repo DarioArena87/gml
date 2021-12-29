@@ -1,15 +1,13 @@
 package it.gml
 
-import groovy.transform.CompileStatic
+class EchelonFormComputation {
+    Matrix result
+    int numberOfRowsExchanges = 0
+}
 
-@CompileStatic
 class GaussJordan {
-    static class EchelonFormComputation {
-        Matrix result
-        int numberOfRowsExchanges = 0
-    }
 
-    static EchelonFormComputation getEchelonForm(final Matrix m){
+    static EchelonFormComputation getEchelonForm(Matrix m){
         final Matrix result = new Matrix(m.copyOfElements)
         int numberOfRowsExchanges = 0
         for (int pivotIndex = 0; pivotIndex < result.rows; pivotIndex++) {
@@ -35,7 +33,7 @@ class GaussJordan {
         return new EchelonFormComputation(result: result, numberOfRowsExchanges: numberOfRowsExchanges)
     }
 
-    static EchelonFormComputation getReducedEchelonForm(final Matrix m) {
+    static EchelonFormComputation getReducedEchelonForm(Matrix m) {
         final EchelonFormComputation ecf = getEchelonForm(m)
         final Matrix echelonForm = ecf.result
         for (int pivotIndex = echelonForm.rows - 1; pivotIndex >= 0; pivotIndex--) {
@@ -68,8 +66,6 @@ class GaussJordan {
     }
 
     private static void exchangeRows(final Matrix m, final int rowIndexA, final int rowIndexB) {
-        final List<Number> rowB = m.elements[rowIndexB]
-        m.elements[rowIndexB] = m.elements[rowIndexA]
-        m.elements[rowIndexA] = rowB
+        m.elements.swap(rowIndexA, rowIndexB)
     }
 }

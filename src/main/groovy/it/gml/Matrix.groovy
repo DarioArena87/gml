@@ -7,7 +7,6 @@ import it.gml.utils.Product
 
 import static it.gml.MatrixGenerator.identity
 
-@CompileStatic
 class Matrix {
 
     final List<List<Number>> elements
@@ -150,7 +149,7 @@ class Matrix {
         multiply(-1)
     }
 
-    /** Dot product */
+    /** Dot product alias */
     Number xor(final Matrix b) {
         dotProduct(b)
     }
@@ -174,8 +173,8 @@ class Matrix {
             return elements[0][0] * elements[1][1] - elements[0][1] * elements[1][0]
         }
 
-        final GaussJordan.EchelonFormComputation efc = GaussJordan.getEchelonForm(this)
-        return (-1)**efc.numberOfRowsExchanges * Product.of(efc.result.trace)
+        final EchelonFormComputation efc = GaussJordan.getEchelonForm(this)
+        return (-1)**efc.numberOfRowsExchanges * efc.result.trace.product()
     }
 
     List<List<Number>> getCopyOfElements() {

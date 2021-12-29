@@ -1,0 +1,3 @@
+moduleName = matrixes extension methods
+moduleVersion = 1.0
+extensionClasses = it.gml.utils.Product,it.gml.GaussJordan
