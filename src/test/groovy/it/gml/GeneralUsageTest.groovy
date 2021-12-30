@@ -7,8 +7,8 @@ class GeneralUsageTest extends Specification {
         given: "A coefficient matrix"
         Matrix A = new Matrix(
             [
-                [1, -1, 1],
-                [2, 1, -1],
+                [1, -1,  1],
+                [2,  1, -1],
                 [1, -1, -1]
             ]
         )
@@ -45,7 +45,7 @@ class GeneralUsageTest extends Specification {
 
     def "Big matrices inversion are not a problem"() {
         given: "A big matrix"
-        Matrix A = Spy(Matrix, constructorArgs: [MatrixGenerator.random(50, 50).elements])
+        Matrix A = Spy(MatrixGenerator.random(50, 50))
 
         when:
         Matrix b = A.invert()

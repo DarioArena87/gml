@@ -5,18 +5,11 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class MatrixGenerator {
 
-	static Matrix zeroMatrix(final int rows, final int columns) {
-		final List<List<Number>> elems = new ArrayList<List<Number>>(rows)
-		for (int i = 0; i< rows; i++) {
-			elems[i] = new ArrayList<Number>(columns)
-			for (int j = 0; j < columns; j++) {
-				elems[i][j] = 0 as Number
-			}
-		}
-		new Matrix(elems)
+	static Matrix zeroMatrix(int rows, int columns) {
+		new Matrix(rows, columns)
 	}
 
-	static Matrix diagonal(final int size, final Number elem) {
+	static Matrix diagonal(int size, Number elem) {
 		final Matrix m = zeroMatrix(size, size)
 
 		for(int i = 0; i < size; i++) {

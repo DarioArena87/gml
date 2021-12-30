@@ -261,8 +261,11 @@ class MatrixSpec extends Specification {
             ]
         )
 
+
+        def expected = a * a * a * a * a * a * a * a * a * a * a * a * a * a * a
+
         expect:
-        a**15 == a * a * a * a * a * a * a * a * a * a * a * a * a * a * a
+        a**15 == expected
     }
 
     def "Transposing a matrix reflects it by its main diagonal"() {
@@ -288,17 +291,13 @@ class MatrixSpec extends Specification {
         given:
         Matrix a = new Matrix(
             [
-                [1],
-                [3],
-                [-2],
+                [1, 3, -2],
             ]
         )
 
         Matrix b = new Matrix(
             [
-                [4],
-                [-2],
-                [-1],
+                [4, -2, -1]
             ]
         )
 
