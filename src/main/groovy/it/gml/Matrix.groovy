@@ -1,5 +1,8 @@
 package it.gml
 
+import it.gml.utils.Format
+import org.codehaus.groovy.util.StringUtil
+
 import java.util.function.BiFunction
 
 import static it.gml.MatrixGenerator.identity
@@ -50,7 +53,15 @@ class Matrix {
     }
 
     String toString() {
-        matrix.toString()
+        List<List<Number>> elements = matrix
+        def maxScale = elements.flatten()
+            .collect { Number n -> n.toBigDecimal().stripTrailingZeros() }
+            .max { n -> n.unscaledValue().toString().length() }
+            .unscaledValue().toString().length()
+
+        matrix.collect { row ->
+            "| ${row.collect { Format.leftPad(it.toBigDecimal().stripTrailingZeros().toPlainString(), maxScale + 1)}.join(' ')} |"
+        }.join('\n')
     }
 
     @Override
@@ -220,48 +231,6 @@ class Matrix {
         result*.remove(column)
 
         return new Matrix(result)
-
-
-//        Matrix result = new Matrix(rows - 1, columns - 1)
-//        for (int i in 0..<rows) {
-//            if (i == row) {
-//                continue
-//            }
-//
-//            for (int j in 0..<columns) {
-//                if (j == column) {
-//                    continue
-//                }
-//
-//                result[i][j] = this[i][j]
-//            }
-//        }
-//
-//        return result
-
-//        List<Number[]> result = matrix
-//
-//        result.remove(row)
-//        result.each { it.}*.remove(column)
-
-//        for (i in 0..<rows) {
-//            if (i == row) {
-//                continue
-//            }
-//
-//            result[i] = new ArrayList<Number>()
-//
-//            for (j in 0..<columns) {
-//                if (j == column) {
-//                    continue
-//                }
-//
-//                result[i] << matrix[i][j]
-//            }
-//        }
-
-//        return new Matrix(result)
-
     }
 
     Number getSparsity() {

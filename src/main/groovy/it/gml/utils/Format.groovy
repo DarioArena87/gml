@@ -1,11 +1,15 @@
 package it.gml.utils
 
 final class Format {
-    static Closure<String> leftPad = { final String s, final int size ->
-        (([' '] * (size - s.length())) + [s]).join('')
+    static leftPad(String s, int size, String padStr = ' ') {
+        return repeat(padStr, size - s.length()) + s
     }
 
-    static Closure<String> toPlainString = { final Number elem ->
-        elem.toBigDecimal().toPlainString()
+    static repeat(String s, int times) {
+        if (times <= 0) {
+            return ""
+        }
+        return s * times
     }
+
 }
