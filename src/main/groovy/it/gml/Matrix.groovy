@@ -1,130 +1,161 @@
 package it.gml
 
-
-import groovy.transform.CompileStatic
 import it.gml.utils.Format
-import it.gml.utils.Product
+import org.codehaus.groovy.util.StringUtil
+
+import java.util.function.BiFunction
 
 import static it.gml.MatrixGenerator.identity
 
-@CompileStatic
 class Matrix {
 
-    final List<List<Number>> elements
+    private final Number[][] matrix
 
-    Matrix(final int rows, final int cols) {
+    Matrix(int rows, int cols) {
         assert rows > 0: "Rows must be positive"
         assert cols > 0: "Columns must be positive"
 
-        elements = new ArrayList<>(rows)
-        rows.times { final row -> elements[row] = new ArrayList<Number>(cols) }
+        matrix = new Number[rows][cols]
+        matrix.each {
+            Arrays.fill(it, 0)
+        }
     }
 
-    Matrix(final List<List<Number>> elements) {
+    Matrix(List<List<Number>> elements) {
         assert elements: "Matrix must not be empty"
         assert elements.collect { it.size() }.unique().size() == 1: "Number of columns for each row must be equal"
 
-        this.elements = elements
+        def rows = elements.size()
+        def columns = elements.first().size()
+        matrix = new Number[rows][columns]
+        for (int i in 0..<rows) {
+            for (int j in 0..<columns) {
+                matrix[i][j] = elements[i][j]
+            }
+        }
     }
 
     int getRows() {
-        elements.size()
+        matrix.length
     }
 
     int getColumns() {
-        elements[0].size()
+        matrix[0].length
     }
 
-    List<Number> getAt(final int row) {
-        elements[row]
+    Number[] getAt(int row) {
+        matrix[row]
     }
 
-    void putAt(final int rowIndex, final List<Number> row) {
-        assert row.size() == rows: "New row must be of the same size as other rows"
-
-        elements[rowIndex] = row
+    void putAt(int rowIndex, Number[] row) {
+        assert row.length == columns: "New row must be of the same size as other rows"
+        matrix[rowIndex] = row
     }
 
     String toString() {
-        final List<List<String>> elementsString = elements.collectNested Format.toPlainString
-        final int maxDigits = elementsString.flatten().collect { it.toString().size() }.max()
-        final Closure<String> leftPadMaxDigits = Format.leftPad.rcurry(maxDigits)
+        List<List<Number>> elements = matrix
+        def maxScale = elements.flatten()
+            .collect { Number n -> n.toBigDecimal().stripTrailingZeros() }
+            .max { n -> n.unscaledValue().toString().length() }
+            .unscaledValue().toString().length()
 
-        elementsString.collect { "| ${it.collect(leftPadMaxDigits).join('  ')} |" }.join('\n')
+        matrix.collect { row ->
+            "| ${row.collect { Format.leftPad(it.toBigDecimal().stripTrailingZeros().toPlainString(), maxScale + 1)}.join(' ')} |"
+        }.join('\n')
     }
 
     @Override
     int hashCode() {
-        Objects.hash(elements)
+        matrix.hashCode()
     }
 
     @Override
-    boolean equals(final Object obj) {
-        if (obj == null || !obj in Matrix) {
-            return false
+    boolean equals(Object obj) {
+        if (obj instanceof Matrix) {
+            return equalsDimensions(obj) && elementsEquals(obj)
         }
 
-        final Matrix b = obj as Matrix
-
-        return equalsDimensions(b) && elements == b.elements
+        return false
     }
 
-    boolean equalsDimensions(final Matrix b) {
+    boolean equalsDimensions(Matrix b) {
         rows == b.rows && columns == b.columns
     }
 
-    Matrix plus(final Matrix b) {
-        assert equalsDimensions(b): "Dimensions mismatch"
-
-        final Matrix result = new Matrix(rows, columns)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[i][j] = elements[i][j] + b[i][j]
-            }
-        }
-
-        return result
-    }
-
-    Matrix plus(final Number scalar) {
-        new Matrix(elements.collectNested { Number elem -> elem + scalar })
-    }
-
-    Matrix minus(final Matrix b) {
-        assert equalsDimensions(b): "Dimensions mismatch"
-
-        final Matrix result = new Matrix(rows, columns)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                result[i][j] = elements[i][j] - b[i][j]
-            }
-        }
-
-        return result
-    }
-
-    Matrix minus(final Number scalar) {
-        new Matrix(elements.collectNested { Number elem -> elem - scalar })
-    }
-
-    Matrix multiply(final Matrix b) {
-        assert columns == b.rows: "Number of left matrix's columns and right matrix's rows must be equal"
-
-        final Matrix result = new Matrix(rows, b.columns)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < b.columns; j++) {
-                result[i][j] = 0 as Number
-                for (int k = 0; k < columns; k++) {
-                    result[i][j] += elements[i][k] * b[k][j]
+    boolean elementsEquals(Matrix other) {
+        for (i in 0..<rows) {
+            for (j in 0..<columns) {
+                if (matrix[i][j] != other.matrix[i][j]) {
+                    return false
                 }
             }
         }
 
+        return true
+    }
+
+    private static elementWise(Matrix a, Matrix b, Matrix result, BiFunction<Number, Number, Number> operation) {
+        for (i in (0..<result.rows)) {
+            for (j in (0..<result.columns)) {
+                result[i][j] = operation.apply(a[i][j], b[i][j])
+            }
+        }
+    }
+
+    private static elementWise(Matrix a, Number number, Matrix result, BiFunction<Number, Number, Number> operation) {
+        for (i in (0..<result.rows)) {
+            for (j in (0..<result.columns)) {
+                result[i][j] = operation.apply(a[i][j], number)
+            }
+        }
+    }
+
+    Matrix plus(Matrix other) {
+        assert equalsDimensions(other): "Dimensions mismatch"
+
+        Matrix result = new Matrix(rows, columns)
+        elementWise(this, other, result) { a, b -> a + b }
+
         return result
     }
 
-    Matrix multiply(final Number scalar) {
-        new Matrix(elements.collectNested { Number elem -> elem * scalar })
+    Matrix plus(Number scalar) {
+        Matrix result = new Matrix(rows, columns)
+        elementWise(this, scalar, result) { a, b -> a + b }
+        return result
+    }
+
+    Matrix minus(Matrix other) {
+        assert equalsDimensions(other): "Dimensions mismatch"
+
+        Matrix result = new Matrix(rows, columns)
+        elementWise(this, other, result) { a, b -> a - b }
+        return result
+    }
+
+    Matrix minus(Number scalar) {
+        Matrix result = new Matrix(rows, columns)
+        elementWise(this, scalar, result) { a, b -> a - b }
+        return result
+    }
+
+    Matrix multiply(Matrix b) {
+        assert columns == b.rows: "Number of left matrix's columns and right matrix's rows must be equal"
+
+        Matrix result = new Matrix(rows, b.columns)
+        for (i in (0..<result.rows)) {
+            for (j in (0..<result.columns)) {
+                result[i][j] = (0..<columns).collect { k -> this[i][k] * b[k][j]}.sum() as Number
+            }
+        }
+
+        return result
+    }
+
+    Matrix multiply(Number scalar) {
+        Matrix result = new Matrix(rows, columns)
+        elementWise(this, scalar, result) { a, b -> a * b }
+        return result
     }
 
     Matrix power(final long exponent) {
@@ -147,51 +178,63 @@ class Matrix {
     }
 
     Matrix negative() {
-        multiply(-1)
+        Matrix result = new Matrix(rows, columns)
+        for (i in (0..<result.rows)) {
+            for (j in (0..<result.columns)) {
+                result[i][j] = -this[i][j]
+            }
+        }
+        return result
     }
 
-    /** Dot product */
-    Number xor(final Matrix b) {
+    /** Dot product alias */
+    Number xor(Matrix b) {
         dotProduct(b)
     }
 
-    Number dotProduct(final Matrix b) {
-        (transpose() * b)[0][0]
+    Number dotProduct(Matrix b) {
+        (this * b.transpose())[0][0]
     }
 
     Matrix transpose() {
-        new Matrix(elements.transpose())
+        Matrix result = new Matrix(columns, rows)
+        for (i in (0..<result.rows)) {
+            for (j in (0..<result.columns)) {
+                result[i][j] = this[j][i]
+            }
+        }
+        return result
     }
 
     Number getDeterminant() {
         assert rows == columns: "Cannot compute determinant on non square matrix"
 
         if (rows == 1) {
-            return elements[0][0]
+            return matrix[0][0]
         }
 
         if (rows == 2) {
-            return elements[0][0] * elements[1][1] - elements[0][1] * elements[1][0]
+            return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
         }
 
-        final GaussJordan.EchelonFormComputation efc = GaussJordan.getEchelonForm(this)
-        return (-1)**efc.numberOfRowsExchanges * Product.of(efc.result.trace)
+        final EchelonFormComputation efc = GaussJordan.getEchelonForm(this)
+        return (-1)**efc.numberOfRowsExchanges * efc.result.trace.product()
     }
 
-    List<List<Number>> getCopyOfElements() {
-        elements.collect { it.collect() }
-    }
+    Matrix minor(int row, int column) {
+        List<List<Number>> result = []
+        matrix.each {
+            result << it.toList()
+        }
 
-    Matrix minor(final int row, final int column) {
-        new Matrix(
-            copyOfElements.tap {
-                it.remove(row)
-                it*.remove(column)
-            }
-        )
+        result.remove(row)
+        result*.remove(column)
+
+        return new Matrix(result)
     }
 
     Number getSparsity() {
+        def elements = matrix as List<List<Number>>
         elements.flatten().findAll().size() / (rows * columns)
     }
 
@@ -204,20 +247,34 @@ class Matrix {
 
         final Matrix augmentedMatrix = augment(identity(rows))
         final Matrix result = GaussJordan.getReducedEchelonForm(augmentedMatrix).result
-        new Matrix(result.elements.collect { it[columns..<result.columns] })
+        return new Matrix(result.matrix.collect { it[columns..<result.columns] })
     }
 
-    Matrix round(final int precision) {
-        new Matrix(elements.collectNested { Number elem -> elem.toBigDecimal().round(precision) })
+    Matrix round(int precision) {
+        List<List<Number>> result = []
+        for (i in 0..<rows) {
+            result[i] = []
+
+            for (j in 0..<columns) {
+                result[i][j] = matrix[i][j].toBigDecimal().round(precision)
+            }
+        }
+
+        return new Matrix(result)
     }
 
-    Matrix augment(final Matrix m) {
+    Matrix augment(Matrix m) {
         assert m.rows == rows: "Matrices' row number must be equal"
 
-        new Matrix(elements.indexed().collect { int rowNumber, List<Number> row -> row + m[rowNumber] })
+        List<Number[]> result = new ArrayList<>(rows)
+        (0..<rows).each {
+            result[it] = this[it] + m[it]
+        }
+        return new Matrix(result)
     }
 
     List<Number> getTrace() {
-        (0..<rows).collect { elements[it][it] }
+        (0..<rows).collect { matrix[it][it] }
     }
+
 }

@@ -1,13 +1,19 @@
 package it.gml
 
-class GaussJordan {
-    static class EchelonFormComputation {
-        Matrix result
-        int numberOfRowsExchanges = 0
-    }
+class EchelonFormComputation {
+    Matrix result
+    int numberOfRowsExchanges = 0
+}
 
-    static EchelonFormComputation getEchelonForm(final Matrix m){
-        final Matrix result = new Matrix(m.copyOfElements)
+class GaussJordan {
+
+    static EchelonFormComputation getEchelonForm(Matrix m){
+        final Matrix result = new Matrix(m.rows, m.columns)
+        (0..<m.rows).each { i ->
+            (0..<m.columns).each { j ->
+                result[i][j] = m[i][j]
+            }
+        }
         int numberOfRowsExchanges = 0
         for (int pivotIndex = 0; pivotIndex < result.rows; pivotIndex++) {
             if (!result[pivotIndex][pivotIndex]) {
@@ -32,7 +38,7 @@ class GaussJordan {
         return new EchelonFormComputation(result: result, numberOfRowsExchanges: numberOfRowsExchanges)
     }
 
-    static EchelonFormComputation getReducedEchelonForm(final Matrix m) {
+    static EchelonFormComputation getReducedEchelonForm(Matrix m) {
         final EchelonFormComputation ecf = getEchelonForm(m)
         final Matrix echelonForm = ecf.result
         for (int pivotIndex = echelonForm.rows - 1; pivotIndex >= 0; pivotIndex--) {
@@ -57,7 +63,7 @@ class GaussJordan {
     private static int findPivotRowIndex(final Matrix m, final int startPivotIndex) {
         final int column = startPivotIndex
         for (int i = startPivotIndex; i < m.rows; i++) {
-            if (m.elements[i][column] != 0) {
+            if (m[i][column] != 0) {
                 return i
             }
         }
@@ -65,8 +71,8 @@ class GaussJordan {
     }
 
     private static void exchangeRows(final Matrix m, final int rowIndexA, final int rowIndexB) {
-        final List<Number> rowB = m.elements[rowIndexB]
-        m.elements[rowIndexB] = m.elements[rowIndexA]
-        m.elements[rowIndexA] = rowB
+        def temp = m[rowIndexA]
+        m[rowIndexA] = m[rowIndexB]
+        m[rowIndexB] = temp
     }
 }

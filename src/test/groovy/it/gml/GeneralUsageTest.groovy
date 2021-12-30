@@ -7,20 +7,20 @@ class GeneralUsageTest extends Specification {
         given: "A coefficient matrix"
         Matrix A = new Matrix(
             [
-                [1, -1, 1],
-                [2, 1, -1],
+                [1, -1,  1],
+                [2,  1, -1],
                 [1, -1, -1]
             ]
         )
 
         and: "A known vector"
-        Matrix b = new Vector([6, -3, 0])
+        Matrix b = new Vector(6, -3, 0).transpose()
 
         when: "I compute the solution as A^(-1) * b"
         Matrix x = A**-1 * b
 
         then:
-        x.round(4) == new Vector([1, -2, 3])
+        x.round(4) == new Vector(1, -2, 3).transpose()
     }
 
     def "If a matrix is singular, system has no solution"() {
@@ -45,12 +45,13 @@ class GeneralUsageTest extends Specification {
 
     def "Big matrices inversion are not a problem"() {
         given: "A big matrix"
-        Matrix A = Spy(Matrix, constructorArgs: [MatrixGenerator.random(50, 50).elements])
+        Matrix A = Spy(MatrixGenerator.random(50, 50))
 
         when:
         Matrix b = A.invert()
 
         then:
         1 * A.determinant
+        (b * A).round(4) == MatrixGenerator.identity(50)
     }
 }
