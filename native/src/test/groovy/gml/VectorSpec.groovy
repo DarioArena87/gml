@@ -1,12 +1,15 @@
-package it.gml
+package gml
 
+import it.gml.CreateVector
+import it.gml.Matrix
+import it.gml.Vector
 import spock.lang.Specification
 
 class VectorSpec extends Specification{
     def "A vector is a unidimensional matrix"(){
         given:
-        Vector a = new Vector(1, 2, 3)
-        def b = new Vector([4, 5, 6]).transpose()
+        Vector a = CreateVector.from(1, 2, 3)
+        def b = CreateVector.from([4, 5, 6]).transpose()
 
         expect:
         a instanceof Matrix
@@ -20,8 +23,8 @@ class VectorSpec extends Specification{
 
     def "Two vectors can be multiplied using dot product"() {
         given:
-        Vector a = new Vector(1, 3, -5)
-        Vector b = new Vector(4, -2, -1)
+        Vector a = CreateVector.from(1, 3, -5)
+        Vector b = CreateVector.from(4, -2, -1)
 
         when:
         Number result = a ^ b

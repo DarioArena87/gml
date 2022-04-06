@@ -5,13 +5,14 @@ class EchelonFormComputation {
     int numberOfRowsExchanges = 0
 }
 
+@Category(Matrix)
 class GaussJordan {
 
-    static EchelonFormComputation getEchelonForm(Matrix m){
-        final Matrix result = new Matrix(m.rows, m.columns)
-        (0..<m.rows).each { i ->
-            (0..<m.columns).each { j ->
-                result[i][j] = m[i][j]
+    EchelonFormComputation getEchelonForm(){
+        final Matrix result = CreateMatrix.of(this.rows, this.columns)
+        (0..<this.rows).each { i ->
+            (0..<this.columns).each { j ->
+                result[i][j] = this[i][j]
             }
         }
         int numberOfRowsExchanges = 0
@@ -38,8 +39,8 @@ class GaussJordan {
         return new EchelonFormComputation(result: result, numberOfRowsExchanges: numberOfRowsExchanges)
     }
 
-    static EchelonFormComputation getReducedEchelonForm(Matrix m) {
-        final EchelonFormComputation ecf = getEchelonForm(m)
+    EchelonFormComputation getReducedEchelonForm() {
+        final EchelonFormComputation ecf = this.getEchelonForm()
         final Matrix echelonForm = ecf.result
         for (int pivotIndex = echelonForm.rows - 1; pivotIndex >= 0; pivotIndex--) {
             Number pivot = echelonForm[pivotIndex][pivotIndex]
@@ -55,24 +56,24 @@ class GaussJordan {
             }
         }
 
-        return ecf.tap {
-            result = echelonForm
-        }
+        ecf.result = echelonForm
+
+        return ecf
     }
 
-    private static int findPivotRowIndex(final Matrix m, final int startPivotIndex) {
+    void exchangeRows(Matrix m, int rowIndexA, int rowIndexB) {
+        def temp = m[rowIndexA]
+        m[rowIndexA] = m[rowIndexB]
+        m[rowIndexB] = temp
+    }
+
+    int findPivotRowIndex(Matrix matrix, int startPivotIndex) {
         final int column = startPivotIndex
-        for (int i = startPivotIndex; i < m.rows; i++) {
-            if (m[i][column] != 0) {
+        for (int i = startPivotIndex; i < matrix.rows; i++) {
+            if (matrix[i][column] != 0) {
                 return i
             }
         }
         return -1
-    }
-
-    private static void exchangeRows(final Matrix m, final int rowIndexA, final int rowIndexB) {
-        def temp = m[rowIndexA]
-        m[rowIndexA] = m[rowIndexB]
-        m[rowIndexB] = temp
     }
 }

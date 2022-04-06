@@ -1,17 +1,16 @@
 package it.gml
 
 import it.gml.utils.Format
-import org.codehaus.groovy.util.StringUtil
 
 import java.util.function.BiFunction
 
-import static it.gml.MatrixGenerator.identity
+import static it.gml.CreateMatrix.identity
 
-class Matrix {
+class NativeMatrix implements Matrix {
 
     private final Number[][] matrix
 
-    Matrix(int rows, int cols) {
+    NativeMatrix(int rows, int cols) {
         assert rows > 0: "Rows must be positive"
         assert cols > 0: "Columns must be positive"
 
@@ -21,7 +20,7 @@ class Matrix {
         }
     }
 
-    Matrix(List<List<Number>> elements) {
+    NativeMatrix(List<List<Number>> elements) {
         assert elements: "Matrix must not be empty"
         assert elements.collect { it.size() }.unique().size() == 1: "Number of columns for each row must be equal"
 
@@ -55,9 +54,9 @@ class Matrix {
     String toString() {
         List<List<Number>> elements = matrix
         def maxScale = elements.flatten()
-            .collect { Number n -> n.toBigDecimal().stripTrailingZeros() }
-            .max { n -> n.unscaledValue().toString().length() }
-            .unscaledValue().toString().length()
+                               .collect { Number n -> n.toBigDecimal().stripTrailingZeros() }
+                               .max { n -> n.unscaledValue().toString().length() }
+                               .unscaledValue().toString().length()
 
         matrix.collect { row ->
             "| ${row.collect { Format.leftPad(it.toBigDecimal().stripTrailingZeros().toPlainString(), maxScale + 1)}.join(' ')} |"
@@ -113,14 +112,14 @@ class Matrix {
     Matrix plus(Matrix other) {
         assert equalsDimensions(other): "Dimensions mismatch"
 
-        Matrix result = new Matrix(rows, columns)
+        Matrix result = new NativeMatrix(rows, columns)
         elementWise(this, other, result) { a, b -> a + b }
 
         return result
     }
 
     Matrix plus(Number scalar) {
-        Matrix result = new Matrix(rows, columns)
+        Matrix result = new NativeMatrix(rows, columns)
         elementWise(this, scalar, result) { a, b -> a + b }
         return result
     }
@@ -128,13 +127,13 @@ class Matrix {
     Matrix minus(Matrix other) {
         assert equalsDimensions(other): "Dimensions mismatch"
 
-        Matrix result = new Matrix(rows, columns)
+        Matrix result = new NativeMatrix(rows, columns)
         elementWise(this, other, result) { a, b -> a - b }
         return result
     }
 
     Matrix minus(Number scalar) {
-        Matrix result = new Matrix(rows, columns)
+        Matrix result = new NativeMatrix(rows, columns)
         elementWise(this, scalar, result) { a, b -> a - b }
         return result
     }
@@ -142,7 +141,7 @@ class Matrix {
     Matrix multiply(Matrix b) {
         assert columns == b.rows: "Number of left matrix's columns and right matrix's rows must be equal"
 
-        Matrix result = new Matrix(rows, b.columns)
+        Matrix result = new NativeMatrix(rows, b.columns)
         for (i in (0..<result.rows)) {
             for (j in (0..<result.columns)) {
                 result[i][j] = (0..<columns).collect { k -> this[i][k] * b[k][j]}.sum() as Number
@@ -153,7 +152,7 @@ class Matrix {
     }
 
     Matrix multiply(Number scalar) {
-        Matrix result = new Matrix(rows, columns)
+        Matrix result = new NativeMatrix(rows, columns)
         elementWise(this, scalar, result) { a, b -> a * b }
         return result
     }
@@ -178,7 +177,7 @@ class Matrix {
     }
 
     Matrix negative() {
-        Matrix result = new Matrix(rows, columns)
+        Matrix result = new NativeMatrix(rows, columns)
         for (i in (0..<result.rows)) {
             for (j in (0..<result.columns)) {
                 result[i][j] = -this[i][j]
@@ -197,7 +196,7 @@ class Matrix {
     }
 
     Matrix transpose() {
-        Matrix result = new Matrix(columns, rows)
+        Matrix result = new NativeMatrix(columns, rows)
         for (i in (0..<result.rows)) {
             for (j in (0..<result.columns)) {
                 result[i][j] = this[j][i]
@@ -230,7 +229,7 @@ class Matrix {
         result.remove(row)
         result*.remove(column)
 
-        return new Matrix(result)
+        return new NativeMatrix(result)
     }
 
     Number getSparsity() {
@@ -247,7 +246,7 @@ class Matrix {
 
         final Matrix augmentedMatrix = augment(identity(rows))
         final Matrix result = GaussJordan.getReducedEchelonForm(augmentedMatrix).result
-        return new Matrix(result.matrix.collect { it[columns..<result.columns] })
+        return new NativeMatrix(result.matrix.collect { it[columns..<result.columns] })
     }
 
     Matrix round(int precision) {
@@ -260,7 +259,7 @@ class Matrix {
             }
         }
 
-        return new Matrix(result)
+        return new NativeMatrix(result)
     }
 
     Matrix augment(Matrix m) {
@@ -270,11 +269,10 @@ class Matrix {
         (0..<rows).each {
             result[it] = this[it] + m[it]
         }
-        return new Matrix(result)
+        return new NativeMatrix(result)
     }
 
     List<Number> getTrace() {
         (0..<rows).collect { matrix[it][it] }
     }
-
 }

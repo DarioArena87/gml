@@ -1,0 +1,14 @@
+plugins {
+    id 'groovy'
+}
+
+group 'groovy-matrix-lib'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy-all:3.0.10'
+}
