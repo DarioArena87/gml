@@ -85,7 +85,7 @@ class Matrix {
     boolean elementsEquals(Matrix other) {
         for (i in 0..<rows) {
             for (j in 0..<columns) {
-                if (matrix[i][j] != other.matrix[i][j]) {
+                if (matrix[i][j] != other[i][j]) {
                     return false
                 }
             }

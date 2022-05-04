@@ -5,7 +5,7 @@ import spock.lang.Specification
 class MatrixSpec extends Specification {
     def "A matrix is a grid of elements"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 2, 3, 4],
                 [3, 4, 2, 6],
@@ -20,7 +20,7 @@ class MatrixSpec extends Specification {
 
     def "A matrix should not be empty/1"() {
         when:
-        Matrix a = new Matrix(elems)
+        Matrix a = CreateMatrix.from(elems)
 
         then:
         thrown AssertionError
@@ -31,7 +31,7 @@ class MatrixSpec extends Specification {
 
     def "A matrix should not be empty/2"() {
         when:
-        Matrix a = new Matrix(rows, cols)
+        Matrix a = CreateMatrix.of(rows, cols)
 
         then:
         thrown AssertionError
@@ -46,7 +46,7 @@ class MatrixSpec extends Specification {
 
     def "In a matrix all the rows must have the same number of columns"() {
         when:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 2, 3, 4],
                 [3, 4],
@@ -60,7 +60,7 @@ class MatrixSpec extends Specification {
 
     def "Two matrices are equals if they have the same dimensions and all elements are the same"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -68,7 +68,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix b = new Matrix(
+        Matrix b = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -76,7 +76,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix c = new Matrix(
+        Matrix c = CreateMatrix.from(
             [
                 [1, 3, 6, 7],
                 [7, 5, 2, 5],
@@ -84,7 +84,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix d = new Matrix(
+        Matrix d = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 1],
@@ -101,7 +101,7 @@ class MatrixSpec extends Specification {
 
     def "Matrix addition"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -109,7 +109,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix b = new Matrix(
+        Matrix b = CreateMatrix.from(
             [
                 [6, 1, 2],
                 [2, 4, 3],
@@ -118,7 +118,7 @@ class MatrixSpec extends Specification {
         )
 
         expect:
-        a + b == new Matrix(
+        a + b == CreateMatrix.from(
             [
                 [7, 4, 8],
                 [9, 9, 5],
@@ -129,7 +129,7 @@ class MatrixSpec extends Specification {
 
     def "Matrix scalar addition"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -140,7 +140,7 @@ class MatrixSpec extends Specification {
         Number b = 2.5
 
         expect:
-        a + b == new Matrix(
+        a + b == CreateMatrix.from(
             [
                 [3.5, 5.5, 8.5],
                 [9.5, 7.5, 4.5],
@@ -151,7 +151,7 @@ class MatrixSpec extends Specification {
 
     def "Matrix subtraction"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -159,7 +159,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix b = new Matrix(
+        Matrix b = CreateMatrix.from(
             [
                 [6, 1, 2],
                 [2, 4, 3],
@@ -168,7 +168,7 @@ class MatrixSpec extends Specification {
         )
 
         expect:
-        a - b == new Matrix(
+        a - b == CreateMatrix.from(
             [
                 [-5, 2, 4],
                 [5, 1, -1],
@@ -179,7 +179,7 @@ class MatrixSpec extends Specification {
 
     def "Matrix scalar subtraction"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -190,7 +190,7 @@ class MatrixSpec extends Specification {
         Number b = 3.2
 
         expect:
-        a - b == new Matrix(
+        a - b == CreateMatrix.from(
             [
                 [-2.2, -0.2, 2.8],
                 [ 3.8, 1.8, -1.2],
@@ -201,7 +201,7 @@ class MatrixSpec extends Specification {
 
     def "Per scalar multiplication"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -210,7 +210,7 @@ class MatrixSpec extends Specification {
         )
 
         expect:
-        a * 2 == new Matrix(
+        a * 2 == CreateMatrix.from(
             [
                 [2, 6, 12],
                 [14, 10, 4],
@@ -221,7 +221,7 @@ class MatrixSpec extends Specification {
 
     def "Matrix multiplication"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 5, 2, 6],
                 [8, 0, 7, 5],
@@ -229,7 +229,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix b = new Matrix(
+        Matrix b = CreateMatrix.from(
             [
                 [2, 1],
                 [3, 7],
@@ -242,7 +242,7 @@ class MatrixSpec extends Specification {
         Matrix product = a * b
 
         then:
-        product == new Matrix(
+        product == CreateMatrix.from(
             [
                 [63, 90],
                 [65, 53],
@@ -253,7 +253,7 @@ class MatrixSpec extends Specification {
 
     def "Matrix power is a very fast way of multiply matrix by itself"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 6],
                 [7, 5, 2],
@@ -270,7 +270,7 @@ class MatrixSpec extends Specification {
 
     def "Transposing a matrix reflects it by its main diagonal"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, 5],
                 [2, 4, 6],
@@ -278,7 +278,7 @@ class MatrixSpec extends Specification {
         )
 
         expect:
-        a.transpose() == new Matrix(
+        a.transpose() == CreateMatrix.from(
             [
                 [1, 2],
                 [3, 4],
@@ -289,13 +289,13 @@ class MatrixSpec extends Specification {
 
     def "Dot product"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3, -2],
             ]
         )
 
-        Matrix b = new Matrix(
+        Matrix b = CreateMatrix.from(
             [
                 [4, -2, -1]
             ]
@@ -310,7 +310,7 @@ class MatrixSpec extends Specification {
 
     def "Sparsity is the number non zero elements over total number of elements"() {
         given:
-        Matrix m = new Matrix(
+        Matrix m = CreateMatrix.from(
             [
                 [0, 0, 0, 0],
                 [5, 8, 0, 0],
@@ -326,14 +326,14 @@ class MatrixSpec extends Specification {
 
     def "Determinant"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [1, 3],
                 [7, 5]
             ]
         )
 
-        Matrix b = new Matrix(
+        Matrix b = CreateMatrix.from(
             [
                 [-2, 2, -3],
                 [-1, 1,  3],
@@ -348,7 +348,7 @@ class MatrixSpec extends Specification {
 
     def "Minors of a matrix are constructed removing a row and a column from a matrix"() {
         given:
-        Matrix m = new Matrix(
+        Matrix m = CreateMatrix.from(
             [
                 [3, 0, 2, 0],
                 [5, 8, 0, 5],
@@ -362,7 +362,7 @@ class MatrixSpec extends Specification {
         Matrix minor13 = m.minor(1, 3)
 
         then:
-        m == new Matrix(
+        m == CreateMatrix.from(
             [
                 [3, 0, 2, 0],
                 [5, 8, 0, 5],
@@ -372,7 +372,7 @@ class MatrixSpec extends Specification {
         )
 
         and:
-        minor01 == new Matrix(
+        minor01 == CreateMatrix.from(
             [
                 [5, 0, 5],
                 [1, 3, 4],
@@ -380,7 +380,7 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        minor13 == new Matrix(
+        minor13 == CreateMatrix.from(
             [
                 [3, 0, 2],
                 [1, 0, 3],
@@ -391,7 +391,7 @@ class MatrixSpec extends Specification {
 
     def "Inverse matrix is the one that multiplies a matrix and results in identity matrix"() {
         given:
-        Matrix m = new Matrix(
+        Matrix m = CreateMatrix.from(
             [
                 [1, 2],
                 [2, 3]
@@ -402,19 +402,19 @@ class MatrixSpec extends Specification {
         Matrix inverse = m.invert()
 
         then:
-        inverse == new Matrix(
+        inverse == CreateMatrix.from(
             [
                 [-3,  2],
                 [ 2, -1]
             ]
         )
 
-        m * inverse == MatrixGenerator.identity(2)
+        m * inverse == CreateMatrix.identity(2)
     }
 
     def "Augment"() {
         given:
-        Matrix a = new Matrix(
+        Matrix a = CreateMatrix.from(
             [
                 [5, 0, 5],
                 [1, 3, 4],
@@ -422,10 +422,10 @@ class MatrixSpec extends Specification {
             ]
         )
 
-        Matrix i = MatrixGenerator.identity(3)
+        Matrix i = CreateMatrix.identity(3)
 
         expect:
-        a.augment(i) == new Matrix(
+        a.augment(i) == CreateMatrix.from(
             [
                 [5, 0, 5, 1, 0, 0],
                 [1, 3, 4, 0, 1, 0],

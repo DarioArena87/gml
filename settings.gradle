@@ -1,1 +1,5 @@
 rootProject.name = 'groovy-matrix-lib'
+include 'native'
+include 'api'
+include 'tornado'
+

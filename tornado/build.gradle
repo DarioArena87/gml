@@ -1,0 +1,30 @@
+plugins {
+    id 'groovy'
+}
+
+group 'groovy-matrix-lib'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'universityOfManchester-graal'
+        url 'https://raw.githubusercontent.com/beehive-lab/tornado/maven-tornadovm'
+    }
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy:3.0.9'
+    implementation project(':api')
+
+    implementation 'tornado:tornado-api:0.13'
+    implementation 'tornado:tornado-matrices:0.13'
+
+    testImplementation 'org.spockframework:spock-core:2.2-M1-groovy-3.0'
+    testImplementation 'net.bytebuddy:byte-buddy:1.12.6'
+    testImplementation 'org.objenesis:objenesis:3.2'
+}
+
+test {
+    useJUnitPlatform()
+}
